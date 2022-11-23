@@ -1,25 +1,37 @@
 package co.uniquindio.fundamentos.encriptacion;
 
+import java.awt.Component;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /**
  * @author JaemT1
  */
 public class Aplicacion {
+    // private static String RUTA = "C:\\textoEncriptado\\textoEncriptado.txt";
+    private static String RUTA = "";
+    private static Component panelBase;
+    
     public static void main(String[] args) {
        String mensaje = verificarMensaje();
-       encriptar(mensaje);
+        try {
+            encriptar(mensaje);
+        } catch (IOException ex) {
+            ex.getMessage();
+        }
     }
     
     
     /**
      * Método que encripta un mensaje determinado sumandole 8 al código ascii de cada letra
      * @param mensaje Mensaje introducido por el usuario 
+     * @throws java.io.IOException 
      */
-    public static void encriptar(String mensaje){
+    public static void encriptar(String mensaje) throws IOException{
         /*Declaramos las variables que van a guardar el mensaje encriptado 
         y el arreglo de char que guarda cada letra del mensaje*/
         String mensajeEncriptado;
@@ -33,35 +45,46 @@ public class Aplicacion {
         //Se obtiene el mensaje encriptado en String
         mensajeEncriptado = String.valueOf(mensajeDividido);
         
+        //El usuario escoge la ruta donde quiere que se guarde el mensaje y se obtiene la ruta
+        JFileChooser selectorCarpeta = new JFileChooser();
+        selectorCarpeta.setCurrentDirectory(new File("*"));
+        selectorCarpeta.setDialogTitle("Seleccione la carpeta");
+        selectorCarpeta.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+        if (selectorCarpeta.showOpenDialog(panelBase) == JFileChooser.APPROVE_OPTION) {
+
+            File carpetaSelecciona = selectorCarpeta.getSelectedFile();
+            String ruta1 = carpetaSelecciona.toString();
+            RUTA  = ruta1 + "\\archivoEncriptado.txt";
+        }
+        
         //Se manda el mensaje encriptado para ser guardado en un archivo de texto
-        guardarEnArchivo(mensajeEncriptado);
+        guardarArchivo(RUTA,mensajeEncriptado,false);
+        
         JOptionPane.showMessageDialog(null, "Su mensaje ha sido encriptado con exito!");
+        JOptionPane.showMessageDialog(null, "Recuerde donde guardó el mensaje para luego ser desencriptado");
       
     }
     
     /**
-     * Método que guarda un el mensaje encriptado en un archivo .txt
-     * @param mensajeEncriptado mensaje ya encriptado
+     * Este metodo recibe una cadena con el contenido que se quiere guardar en
+     * el archivo
+     *
+     * @param ruta es la ruta o path donde esta ubicado el archivo
+     * @throws IOException
      */
-    public static void guardarEnArchivo(String mensajeEncriptado){
-        try {
-            String ruta = "textoEncriptado\\textoEncriptado.txt";
-            String contenido = mensajeEncriptado;
-            File file = new File(ruta);
-            
-            // Si el archivo no existe es creado
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            FileWriter fw = new FileWriter(file);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(contenido);
-            bw.close();
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public static void guardarArchivo(String ruta, String contenido, Boolean flagAnexarContenido) throws IOException {
+  
+        FileWriter fw = new FileWriter(ruta, flagAnexarContenido);
+        BufferedWriter bfw = new BufferedWriter(fw);
+        bfw.write(contenido);
+        bfw.close();
+        fw.close();
+        System.out.println("Se guardaron los archivos");
     }
+
+   
+    //---------------------------------VERIFICACIONES-------------------------------------------------------------------
     
     /**
      * Método que verifica si el mensaje introducido por el usuario es mayor a 14 carácteres
